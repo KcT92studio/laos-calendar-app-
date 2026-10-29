@@ -88,6 +88,33 @@ export type ThemeId =
   | 'saffron_orange' 
   | 'dark_luxury';
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export interface ThemeColors {
+  pageBg: string;
+  cardBg: string;
+  cardSubtleBg: string;
+  cardBorder: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  primary: string;
+  secondary: string;
+  headerGradient: string;
+  headerBorder: string;
+  accentBarGradient: string;
+  btnPrimaryBg: string;
+  btnPrimaryText: string;
+  todayBg: string;
+  todayText: string;
+  todayRing: string;
+  holidayColor: string;
+  holidayBg: string;
+  holidayBorder: string;
+  wanSinColor: string;
+  patternColor: string;
+}
+
 export interface ColorTheme {
   id: ThemeId;
   nameLao: string;
@@ -95,12 +122,22 @@ export interface ColorTheme {
   descriptionLao: string;
   primaryColor: string;
   secondaryColor: string;
+  light: ThemeColors;
+  dark: ThemeColors;
+}
+
+export interface ActiveThemeConfig {
+  id: ThemeId;
+  nameLao: string;
+  nameEn: string;
+  descriptionLao: string;
+  isDark: boolean;
+  colors: ThemeColors;
+  // Convenience properties for components
   headerGradient: string;
   headerBorder: string;
   accentBarGradient: string;
-  activeTabClass: string;
-  primaryButtonGradient: string;
-  todayBadgeClass: string;
   pageBgClass: string;
-  isDark: boolean;
+  primaryColor: string;
+  secondaryColor: string;
 }

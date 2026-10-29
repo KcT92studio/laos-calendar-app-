@@ -1,12 +1,52 @@
 @import "tailwindcss";
 
+html,
+body {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Phetsarath', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-serif-lao,
+.font-sans {
+  font-family: 'Phetsarath', sans-serif !important;
+}
+
 @layer base {
   body {
-    font-family: 'Noto Sans Lao', system-ui, -apple-system, sans-serif;
+    font-family: 'Phetsarath', sans-serif;
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
   }
   
-  h1, h2, h3, .font-serif-lao {
-    font-family: 'Noto Serif Lao', serif;
+  button, input, select, textarea {
+    font-family: 'Phetsarath', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-serif-lao {
+    font-family: 'Phetsarath', sans-serif;
   }
 }
 
@@ -17,16 +57,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #fdf8f0;
+  background: var(--card-subtle-bg, #fdf8f0);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4a373;
+  background: var(--card-border, #d4a373);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bc6c25;
+  background: var(--accent-primary, #bc6c25);
 }
 
 /* Print styling for guesthouse receipt */

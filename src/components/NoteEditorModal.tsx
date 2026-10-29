@@ -83,10 +83,17 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
   const categories: EventCategory[] = ['work', 'personal', 'merit', 'bill', 'birthday', 'travel'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+      <div 
+        className="w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150 border transition-colors"
+        style={{
+          backgroundColor: 'var(--card-bg)',
+          borderColor: 'var(--card-border)',
+          color: 'var(--text-primary)'
+        }}
+      >
         {/* Modal Header */}
-        <div className="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between">
+        <div className="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-xl bg-amber-500/20 text-amber-300 text-base">
               📝
@@ -112,14 +119,14 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[78vh] overflow-y-auto">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs font-medium">
               ⚠️ {error}
             </div>
           )}
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 font-serif-lao">
+            <label className="block text-xs font-bold mb-1.5 font-serif-lao" style={{ color: 'var(--text-primary)' }}>
               {t.noteTitleLabel} <span className="text-rose-500">*</span>
             </label>
             <input
@@ -130,7 +137,12 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                 if (error) setError('');
               }}
               placeholder={t.noteTitlePlaceholder}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm bg-slate-50/50"
+              className="w-full px-3.5 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-sm"
+              style={{
+                backgroundColor: 'var(--card-subtle-bg)',
+                borderColor: 'var(--card-border)',
+                color: 'var(--text-primary)',
+              }}
               autoFocus
             />
           </div>
@@ -138,8 +150,8 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
           {/* Date & Quick Date buttons (ມື້ນີ້, ມື້ອື່ນ, ທຸກມື້) */}
           <div>
             <div className="flex flex-wrap items-center justify-between gap-1 mb-1.5">
-              <label className="text-xs font-bold text-slate-700 font-serif-lao flex items-center gap-1">
-                <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
+              <label className="text-xs font-bold font-serif-lao flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                <CalendarIcon className="w-3.5 h-3.5 text-amber-500" />
                 {t.dateLabel}
               </label>
 
@@ -151,8 +163,13 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                   className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
                     !isDaily && date === todayStr
                       ? 'bg-amber-500 text-slate-950 font-bold'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'border opacity-80 hover:opacity-100'
                   }`}
+                  style={{
+                    backgroundColor: !isDaily && date === todayStr ? 'var(--accent-primary)' : 'var(--card-subtle-bg)',
+                    borderColor: 'var(--card-border)',
+                    color: !isDaily && date === todayStr ? 'var(--btn-primary-text)' : 'var(--text-primary)',
+                  }}
                 >
                   {t.today}
                 </button>
@@ -163,8 +180,13 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                   className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
                     !isDaily && date === tomorrowStr
                       ? 'bg-amber-500 text-slate-950 font-bold'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'border opacity-80 hover:opacity-100'
                   }`}
+                  style={{
+                    backgroundColor: !isDaily && date === tomorrowStr ? 'var(--accent-primary)' : 'var(--card-subtle-bg)',
+                    borderColor: 'var(--card-border)',
+                    color: !isDaily && date === tomorrowStr ? 'var(--btn-primary-text)' : 'var(--text-primary)',
+                  }}
                 >
                   {t.tomorrow}
                 </button>
@@ -172,11 +194,16 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                 <button
                   type="button"
                   onClick={handleToggleDaily}
-                  className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                  className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 border ${
                     isDaily
-                      ? 'bg-amber-500 text-slate-950 font-bold ring-1 ring-amber-600'
-                      : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                      ? 'bg-amber-500 text-slate-950 font-bold ring-1 ring-amber-400'
+                      : 'opacity-80 hover:opacity-100'
                   }`}
+                  style={{
+                    backgroundColor: isDaily ? 'var(--accent-primary)' : 'var(--card-subtle-bg)',
+                    borderColor: isDaily ? 'var(--accent-primary)' : 'var(--card-border)',
+                    color: isDaily ? 'var(--btn-primary-text)' : 'var(--text-primary)',
+                  }}
                   title={lang === 'lo' ? 'ທຳເປັນປະຈຳທຸກໆມື້' : 'Repeat every single day'}
                 >
                   <span>🔄</span>
@@ -192,15 +219,25 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                 setDate(e.target.value);
                 setIsDaily(false);
               }}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-amber-500/40 ${
-                isDaily ? 'border-amber-400 bg-amber-50/30' : 'border-slate-200 focus:border-amber-500'
-              }`}
+              className="w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+              style={{
+                backgroundColor: 'var(--card-subtle-bg)',
+                borderColor: isDaily ? 'var(--accent-primary)' : 'var(--card-border)',
+                color: 'var(--text-primary)',
+              }}
               required
             />
 
             {/* Daily repeat active banner */}
             {isDaily && (
-              <div className="mt-1.5 p-2 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center gap-1.5 text-xs text-amber-900 font-medium">
+              <div 
+                className="mt-1.5 p-2 rounded-xl border flex items-center gap-1.5 text-xs font-medium"
+                style={{
+                  backgroundColor: 'var(--card-subtle-bg)',
+                  borderColor: 'var(--accent-primary)',
+                  color: 'var(--accent-primary)',
+                }}
+              >
                 <span className="text-sm">🔄</span>
                 <span>
                   {t.repeatsDaily} ({lang === 'lo' ? 'ຈະສະແດງໃນທຸກໆມື້ຂອງປະຕິທິນ' : 'Will be displayed on all days of the calendar'})
@@ -212,29 +249,40 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
           {/* Time & Reminder Toggle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block font-serif-lao flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <label className="text-xs font-bold mb-1.5 block font-serif-lao flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                <Clock className="w-3.5 h-3.5 text-amber-500" />
                 {t.timeLabel}
               </label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm bg-slate-50/50"
+                className="w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                style={{
+                  backgroundColor: 'var(--card-subtle-bg)',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--text-primary)',
+                }}
               />
             </div>
 
             <div className="flex flex-col justify-end">
-              <label className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-slate-100/60 transition cursor-pointer select-none">
+              <label 
+                className="flex items-center gap-2 p-2.5 rounded-xl border transition cursor-pointer select-none"
+                style={{
+                  backgroundColor: 'var(--card-subtle-bg)',
+                  borderColor: 'var(--card-border)',
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={reminder}
                   onChange={(e) => setReminder(e.target.checked)}
-                  className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500"
+                  className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"
                 />
                 <div className="flex items-center gap-1.5">
-                  <Bell className={`w-3.5 h-3.5 ${reminder ? 'text-amber-600' : 'text-slate-400'}`} />
-                  <span className="text-xs font-semibold text-slate-700 font-serif-lao">
+                  <Bell className={`w-3.5 h-3.5 ${reminder ? 'text-amber-500' : 'text-slate-400'}`} />
+                  <span className="text-xs font-semibold font-serif-lao" style={{ color: 'var(--text-primary)' }}>
                     {t.reminderLabel}
                   </span>
                 </div>
@@ -244,8 +292,8 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
 
           {/* Category selection */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2 font-serif-lao flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5 text-slate-400" />
+            <label className="block text-xs font-bold mb-2 font-serif-lao flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+              <Tag className="w-3.5 h-3.5 text-amber-500" />
               {t.categoryLabel}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -259,9 +307,14 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
                     onClick={() => setCategory(cat)}
                     className={`p-2 rounded-xl text-xs font-medium border text-left flex items-center gap-1.5 transition cursor-pointer ${
                       isSelected
-                        ? 'border-amber-500 bg-amber-50 text-amber-950 font-bold ring-1 ring-amber-400'
-                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                        ? 'border-amber-500 font-bold ring-1 ring-amber-400'
+                        : 'opacity-80 hover:opacity-100'
                     }`}
+                    style={{
+                      backgroundColor: isSelected ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
+                      borderColor: isSelected ? 'var(--accent-primary)' : 'var(--card-border)',
+                      color: 'var(--text-primary)'
+                    }}
                   >
                     <span>{info.icon}</span>
                     <span className="truncate">{lang === 'lo' ? info.lo : info.en}</span>
@@ -273,7 +326,7 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
 
           {/* Details / Notes */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 font-serif-lao">
+            <label className="block text-xs font-bold mb-1.5 font-serif-lao" style={{ color: 'var(--text-primary)' }}>
               {t.detailsLabel}
             </label>
             <textarea
@@ -281,22 +334,36 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t.detailsPlaceholder}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm bg-slate-50/50 resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
+              style={{
+                backgroundColor: 'var(--card-subtle-bg)',
+                borderColor: 'var(--card-border)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <div className="pt-2 flex items-center justify-end gap-2.5 border-t" style={{ borderColor: 'var(--card-border)' }}>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--card-subtle-bg)',
+                borderColor: 'var(--card-border)',
+                color: 'var(--text-primary)',
+              }}
             >
               {t.cancel}
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs flex items-center gap-1.5 hover:opacity-90"
+              style={{
+                backgroundColor: 'var(--btn-primary-bg)',
+                color: 'var(--btn-primary-text)'
+              }}
             >
               <Check className="w-4 h-4" />
               <span>{t.save}</span>

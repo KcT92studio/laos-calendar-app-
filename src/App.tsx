@@ -3,13 +3,15 @@ import { Header } from './components/Header';
 import { CalendarMonthView } from './components/CalendarMonthView';
 import { SettingsModal } from './components/SettingsModal';
 import { NoteEditorModal } from './components/NoteEditorModal';
+import { LaoSinPattern } from './components/LaoSinPattern';
 
-import { ThemeId, Language, UserEvent, LaoHoliday } from './types';
+import { ThemeId, ThemeMode, Language, UserEvent, LaoHoliday } from './types';
 import { LAO_HOLIDAYS_2026 } from './data/laoHolidays';
-import { getThemeById } from './data/themes';
+import { getActiveThemeConfig, getThemeCssVariables } from './data/themes';
 import { TRANSLATIONS } from './utils/translations';
 
 const STORAGE_KEY_THEME = 'lao_calendar_theme_v2';
+const STORAGE_KEY_MODE = 'lao_calendar_theme_mode_v2';
 const STORAGE_KEY_LANG = 'lao_calendar_lang_v1';
 const STORAGE_KEY_EVENTS = 'lao_calendar_events_v2';
 
@@ -70,7 +72,7 @@ export default function App() {
     }
   });
 
-  // Theme selection state
+  // Theme selection state (Default: 'champa_gold')
   const [currentThemeId, setCurrentThemeId] = useState<ThemeId>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_THEME) as ThemeId;
@@ -79,6 +81,40 @@ export default function App() {
       return 'champa_gold';
     }
   });
+
+  // Display Mode state ('light' | 'dark' | 'system')
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_MODE) as ThemeMode;
+      return saved || 'system';
+    } catch {
+      return 'system';
+    }
+  });
+
+  // System dark preference detection
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  // Effective dark mode status
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
+
+  // Active theme configuration & CSS variables
+  const currentTheme = getActiveThemeConfig(currentThemeId, isDark);
+  const themeCssVariables = getThemeCssVariables(currentTheme.colors);
+  const t = TRANSLATIONS[lang];
 
   // Calendar Notes / Reminders state
   const [events, setEvents] = useState<UserEvent[]>(() => {
@@ -98,10 +134,6 @@ export default function App() {
   const [isNoteEditorOpen, setIsNoteEditorOpen] = useState(false);
   const [noteEditorTargetDate, setNoteEditorTargetDate] = useState<string>('2026-10-20');
   const [editingEvent, setEditingEvent] = useState<UserEvent | null>(null);
-
-  // Active theme object
-  const currentTheme = getThemeById(currentThemeId);
-  const t = TRANSLATIONS[lang];
 
   // Register Service Worker for Offline PWA Support
   useEffect(() => {
@@ -136,7 +168,7 @@ export default function App() {
       });
   }, []);
 
-  // Sync theme
+  // Sync theme to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_THEME, currentThemeId);
@@ -144,6 +176,21 @@ export default function App() {
       console.error(e);
     }
   }, [currentThemeId]);
+
+  // Sync mode to localStorage and html root
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_MODE, themeMode);
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      document.body.style.backgroundColor = currentTheme.colors.pageBg;
+    }
+  }, [themeMode, isDark, currentTheme.colors.pageBg]);
 
   // Sync language
   useEffect(() => {
@@ -212,20 +259,37 @@ export default function App() {
     setEvents((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const handleToggleMode = () => {
+    // If currently dark, flip to light; if light, flip to dark
+    setThemeMode(isDark ? 'light' : 'dark');
+  };
+
   return (
-    <div className={`min-h-screen ${currentTheme.pageBgClass} flex flex-col font-['Noto_Sans_Lao',sans-serif] transition-colors duration-300`}>
-      {/* Clean Minimal Header with PWA Install Button, Settings and Add Note */}
+    <div 
+      className="min-h-screen flex flex-col font-['Phetsarath',sans-serif] transition-colors duration-300 w-full max-w-full overflow-x-hidden relative"
+      style={{
+        ...themeCssVariables as React.CSSProperties,
+        backgroundColor: 'var(--app-bg)',
+        color: 'var(--text-primary)',
+      }}
+    >
+      {/* Traditional Lao Sin Woven Textile Pattern Background (4-8% opacity, offline SVG) */}
+      <LaoSinPattern />
+
+      {/* Clean Minimal Header with PWA Install Button, ☀️/🌙 Mode Toggle, Settings and Add Note */}
       <Header
         currentTheme={currentTheme}
         lang={lang}
         notesCount={events.length}
+        isDark={isDark}
+        onToggleMode={handleToggleMode}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenAddNote={() => handleOpenAddEvent(selectedDate)}
         onQuickSelectTheme={(newThemeId) => setCurrentThemeId(newThemeId)}
       />
 
       {/* Main Calendar & Inline Details */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 py-4">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden relative z-1">
         <CalendarMonthView
           currentYear={currentYear}
           currentMonth={currentMonth}
@@ -254,6 +318,9 @@ export default function App() {
         onSelectLanguage={(newLang) => setLang(newLang)}
         currentThemeId={currentThemeId}
         onSelectTheme={(newThemeId) => setCurrentThemeId(newThemeId)}
+        themeMode={themeMode}
+        onSelectThemeMode={(newMode) => setThemeMode(newMode)}
+        isDark={isDark}
         events={events}
         onToggleEventComplete={handleToggleEventComplete}
         onDeleteEvent={handleDeleteEvent}
@@ -275,8 +342,15 @@ export default function App() {
       />
 
       {/* Simple Footer */}
-      <footer className="text-center py-4 text-xs text-slate-400 border-t border-slate-200/60">
-        <div className="max-w-3xl mx-auto px-4 flex items-center justify-between text-[11px]">
+      <footer 
+        className="text-center py-4 text-xs border-t w-full overflow-hidden relative z-1 transition-colors duration-300"
+        style={{
+          borderColor: 'var(--card-border)',
+          color: 'var(--text-muted)',
+          backgroundColor: 'var(--card-subtle-bg)'
+        }}
+      >
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-1 text-[11px]">
           <span>🌸 {t.appTitle} • {t.buddhistYearPrefix} 2569 / 2026</span>
           <span>{lang === 'lo' ? 'ເລື່ອນຊ້າຍ-ຂວາເພື່ອປ່ຽນເດືອນ' : 'Swipe left/right to change month'}</span>
         </div>

@@ -65,6 +65,13 @@ export const TRANSLATIONS = {
     done: 'ສຳເລັດ',
     reminderBadge: 'ແຈ້ງເຕືອນ',
     buddhistYearPrefix: 'ພ.ສ.',
+    themeModeTitle: 'ໂໝດມືດ / ສະຫວ່າງ',
+    themeModeSubtitle: 'ເລືອກຮູບແບບການສະແດງຜົນສະຫວ່າງ ຫຼື ມືດ',
+    lightMode: 'ສະຫວ່າງ',
+    darkMode: 'ມືດ',
+    systemMode: 'ຕາມລະບົບ',
+    systemModeDesc: 'ປັບຕາມໂໝດຂອງອຸປະກອນ',
+    toggleDarkMode: 'ສະຫຼັບໂໝດມືດ / ສະຫວ່າງ',
   },
   en: {
     appTitle: 'Lao Calendar',
@@ -130,6 +137,13 @@ export const TRANSLATIONS = {
     done: 'Done',
     reminderBadge: 'Reminder',
     buddhistYearPrefix: 'B.E.',
+    themeModeTitle: 'Display Appearance',
+    themeModeSubtitle: 'Choose between Light and Dark mode',
+    lightMode: 'Light',
+    darkMode: 'Dark',
+    systemMode: 'System',
+    systemModeDesc: 'Follow device OS preference',
+    toggleDarkMode: 'Toggle Dark / Light Mode',
   },
 };
 
