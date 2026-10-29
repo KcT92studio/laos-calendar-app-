@@ -1,0 +1,6 @@
+{
+  "name": "ປະຕິທິນລາວ & ລະບົບບ້ານພັກ - Lao Calendar & Guesthouse",
+  "description": "ແອັບປະຕິທິນລາວ ຄົບທຸກວັນພັກລັດຖະການ, ວັນສິນ, ບຸນປະເພນີ ແລະ ລະບົບຈັດການປະຕິທິນຈອງຫ້ອງບ້ານພັກສຳລັບປະຊາຊົນລາວ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
