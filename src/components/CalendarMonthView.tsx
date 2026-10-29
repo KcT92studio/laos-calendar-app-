@@ -253,13 +253,17 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
       >
         {/* Authentic Lao Calendar Top Plaque with Patuxay Emblem (ປ້າຍຫົວປະຕິທິນແຫ່ງຊາດ) */}
         <div 
-          className="px-3.5 sm:px-5 py-2.5 border-b flex items-center justify-between gap-2.5 relative overflow-hidden transition-colors duration-300"
+          className={`px-3.5 sm:px-5 py-2.5 border-b flex items-center justify-between gap-2.5 relative overflow-hidden transition-all duration-300 bg-gradient-to-r ${currentTheme.headerGradient} text-white shadow-xs`}
           style={{
-            background: 'linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end))',
             borderColor: 'var(--card-border)',
-            color: '#ffffff'
           }}
         >
+          {/* Subtle Accent Glow Line at top */}
+          <div 
+            className="absolute top-0 left-0 right-0 h-[2px]" 
+            style={{ background: 'linear-gradient(90deg, #f59e0b, #fbbf24, #d97706)' }}
+          />
+
           {/* Left: Patuxay Lao Flag Crest & Calendar Title */}
           <div className="flex items-center gap-2.5 min-w-0">
             <img 
@@ -268,10 +272,10 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-amber-300 shadow-md shrink-0" 
             />
             <div className="min-w-0">
-              <span className="text-[10px] sm:text-[11px] font-bold text-amber-200 tracking-wider uppercase block leading-tight truncate">
+              <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 tracking-wider uppercase block leading-tight truncate drop-shadow-xs">
                 {lang === 'lo' ? 'ປະຕິທິນແຫ່ງຊາດລາວ • B.E. 2569' : 'Lao National Calendar • B.E. 2569'}
               </span>
-              <span className="text-xs sm:text-base font-bold font-serif-lao text-white leading-tight">
+              <span className="text-xs sm:text-base font-black font-serif-lao text-white leading-tight drop-shadow-xs">
                 {t.buddhistYearPrefix} {toBuddhistYear(currentYear)} • ຄ.ສ. {currentYear}
               </span>
             </div>
@@ -279,7 +283,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
 
           {/* Right: Lunar Month Badge & Today Button */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[10px] sm:text-xs font-serif-lao px-2.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/40 text-amber-200 font-bold hidden xs:inline-block">
+            <span className="text-[10px] sm:text-xs font-serif-lao px-2.5 py-0.5 rounded-full bg-black/40 border border-amber-300/40 text-amber-200 font-bold hidden xs:inline-block shadow-xs">
               {monthObj.lunarName}
             </span>
             {onGoToToday && (
@@ -300,6 +304,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             )}
           </div>
         </div>
+
 
         {/* Month Navigation Bar */}
         <div 

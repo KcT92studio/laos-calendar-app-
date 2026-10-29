@@ -15,7 +15,8 @@ import {
   Circle,
   Sun,
   Moon,
-  Laptop
+  Laptop,
+  Download
 } from 'lucide-react';
 import { ThemeId, ThemeMode, Language, UserEvent } from '../types';
 import { LAO_COLOR_THEMES } from '../data/themes';
@@ -63,7 +64,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[lang];
-  const todayStr = '2026-10-20';
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   // Filter notes
   const filteredEvents = events.filter((ev) => {
@@ -81,237 +83,229 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
       <div 
-        className="w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh] border transition-colors"
+        className="w-full max-w-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh] border transition-colors"
         style={{ 
           backgroundColor: 'var(--card-bg)', 
           borderColor: 'var(--card-border)',
           color: 'var(--text-primary)'
         }}
       >
-        {/* Header */}
-        <div className="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between flex-shrink-0 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300">
-              <Settings className="w-5 h-5" />
+        {/* Compact Header */}
+        <div className="bg-slate-900 text-white px-3.5 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between flex-shrink-0 border-b border-slate-800 relative">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+              <Settings className="w-4 h-4 text-amber-300" />
             </div>
-            <div>
-              <h3 className="font-bold text-base sm:text-lg font-serif-lao text-amber-200">
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm sm:text-base font-serif-lao text-amber-200 leading-tight truncate">
                 {lang === 'lo' ? 'ຕັ້ງຄ່າ & ໂນ້ດບັນທຶກ' : 'Settings & Notes'}
               </h3>
-              <p className="text-[11px] text-slate-300">
-                {lang === 'lo' ? 'ເລືອກພາສາ, ໂໝດມືດ/ສະຫວ່າງ, ໂທນສີ ແລະ ບັນທຶກວຽກ' : 'Choose language, dark/light mode, color theme, and notes'}
+              <p className="text-[10px] sm:text-[11px] text-slate-300 truncate">
+                {lang === 'lo' ? 'ເລືອກພາສາ, ໂໝດມືດ/ສະຫວ່າງ, ໂທນສີ ແລະ ບັນທຶກ' : 'Language, themes, mode, and notes'}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 transition cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-slate-200 flex items-center justify-center transition cursor-pointer shrink-0"
+            title={t.close}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tab Switcher */}
+        {/* Compact Segmented Pill Tab Switcher */}
         <div 
-          className="flex border-b flex-shrink-0"
+          className="p-1.5 sm:p-2 border-b flex-shrink-0"
           style={{ 
             backgroundColor: 'var(--card-subtle-bg)', 
             borderColor: 'var(--card-border)' 
           }}
         >
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex-1 py-3 px-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition border-b-2 cursor-pointer ${
-              activeTab === 'settings'
-                ? 'border-amber-500 font-bold'
-                : 'border-transparent opacity-70 hover:opacity-100'
-            }`}
-            style={{
-              color: activeTab === 'settings' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              backgroundColor: activeTab === 'settings' ? 'var(--card-bg)' : 'transparent'
+          <div 
+            className="grid grid-cols-2 p-1 rounded-xl border gap-1"
+            style={{ 
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)'
             }}
           >
-            <Globe className="w-4 h-4 text-amber-500" />
-            <span>{t.tabSettings}</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                activeTab === 'settings'
+                  ? 'shadow-xs text-white'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+              style={{
+                backgroundColor: activeTab === 'settings' ? 'var(--btn-primary-bg)' : 'transparent',
+                color: activeTab === 'settings' ? 'var(--btn-primary-text)' : 'var(--text-secondary)'
+              }}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{t.tabSettings}</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('notes')}
-            className={`flex-1 py-3 px-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition border-b-2 cursor-pointer relative ${
-              activeTab === 'notes'
-                ? 'border-amber-500 font-bold'
-                : 'border-transparent opacity-70 hover:opacity-100'
-            }`}
-            style={{
-              color: activeTab === 'notes' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              backgroundColor: activeTab === 'notes' ? 'var(--card-bg)' : 'transparent'
-            }}
-          >
-            <span className="text-base leading-none">📝</span>
-            <span>{t.tabNotes}</span>
-            {events.length > 0 && (
-              <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-extrabold">
-                {events.length}
-              </span>
-            )}
-          </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                activeTab === 'notes'
+                  ? 'shadow-xs text-white'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+              style={{
+                backgroundColor: activeTab === 'notes' ? 'var(--btn-primary-bg)' : 'transparent',
+                color: activeTab === 'notes' ? 'var(--btn-primary-text)' : 'var(--text-secondary)'
+              }}
+            >
+              <span className="text-sm leading-none">📝</span>
+              <span>{t.tabNotes}</span>
+              {events.length > 0 && (
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 font-black">
+                  {events.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Tab Content Container */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5">
+        <div className="p-3 sm:p-4 overflow-y-auto flex-1 space-y-3.5">
           {activeTab === 'settings' ? (
             <>
-              {/* Native PWA Install Banner */}
+              {/* Native PWA Install Banner (Compact) */}
               {!isInstalled && (
                 <div 
-                  className="p-3.5 rounded-2xl border flex items-center justify-between gap-3"
+                  className="p-2.5 rounded-xl border flex items-center justify-between gap-2 transition"
                   style={{
                     backgroundColor: 'var(--card-subtle-bg)',
                     borderColor: 'var(--card-border)'
                   }}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">📲</span>
-                    <div>
-                      <h5 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
-                        {lang === 'lo' ? 'ຕິດຕັ້ງແອັບລົງໜ້າຈໍໂທລະສັບ' : 'Install App to Home Screen'}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xl shrink-0">📲</span>
+                    <div className="min-w-0">
+                      <h5 className="font-bold text-xs font-serif-lao leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                        {lang === 'lo' ? 'ຕິດຕັ້ງແອັບລົງໜ້າຈໍໂທລະສັບ (PWA)' : 'Install App to Home Screen'}
                       </h5>
-                      <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                        {lang === 'lo' ? 'ໃຊ້ງານເຕັມຈໍແບບ Offline ບໍ່ຕ້ອງໃຊ້ອິນເຕີເນັດ' : 'Works completely offline as a standalone PWA'}
+                      <p className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>
+                        {lang === 'lo' ? 'ໃຊ້ງານເຕັມຈໍແບບ Offline ບໍ່ໃຊ້ອິນເຕີເນັດ' : 'Works completely offline'}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => install()}
-                    className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer shadow-xs whitespace-nowrap"
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer shadow-xs whitespace-nowrap shrink-0 flex items-center gap-1 active:scale-95"
                   >
-                    {lang === 'lo' ? 'ຕິດຕັ້ງແອັບ' : 'Install App'}
+                    <Download className="w-3 h-3" />
+                    <span>{lang === 'lo' ? 'ຕິດຕັ້ງແອັບ' : 'Install'}</span>
                   </button>
                 </div>
               )}
 
-              {/* Section 1: Dark / Light Mode (☀️ / 🌙 / 💻) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--card-border)' }}>
-                  <div className="flex items-center gap-2">
+              {/* Section 1: Display Mode (Compact 3-segment row) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center gap-1.5">
                     {isDark ? (
-                      <Moon className="w-4 h-4 text-amber-400" />
+                      <Moon className="w-3.5 h-3.5 text-amber-400" />
                     ) : (
-                      <Sun className="w-4 h-4 text-amber-500" />
+                      <Sun className="w-3.5 h-3.5 text-amber-500" />
                     )}
-                    <h4 className="font-bold text-sm sm:text-base font-serif-lao" style={{ color: 'var(--text-primary)' }}>
+                    <h4 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
                       {t.themeModeTitle}
                     </h4>
                   </div>
-                  <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                     {t.themeModeSubtitle}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2.5">
-                  {/* Light Mode */}
+                <div 
+                  className="grid grid-cols-3 p-1 rounded-xl border gap-1"
+                  style={{
+                    backgroundColor: 'var(--card-subtle-bg)',
+                    borderColor: 'var(--card-border)'
+                  }}
+                >
+                  {/* Light */}
                   <button
                     onClick={() => onSelectThemeMode('light')}
-                    className={`p-3 rounded-2xl border-2 transition cursor-pointer flex flex-col items-center justify-center text-center gap-1.5 ${
+                    className={`py-1.5 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold ${
                       themeMode === 'light'
-                        ? 'border-amber-500 shadow-xs'
-                        : 'hover:border-slate-400 opacity-80 hover:opacity-100'
+                        ? 'shadow-xs border'
+                        : 'opacity-70 hover:opacity-100'
                     }`}
                     style={{
-                      backgroundColor: themeMode === 'light' ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
-                      borderColor: themeMode === 'light' ? 'var(--accent-primary)' : 'var(--card-border)',
+                      backgroundColor: themeMode === 'light' ? 'var(--card-bg)' : 'transparent',
+                      borderColor: themeMode === 'light' ? 'var(--accent-primary)' : 'transparent',
                       color: 'var(--text-primary)'
                     }}
                   >
-                    <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
-                      <Sun className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-xs font-serif-lao">
-                      {t.lightMode}
-                    </span>
-                    {themeMode === 'light' && (
-                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
-                        ✓
-                      </span>
-                    )}
+                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{t.lightMode}</span>
+                    {themeMode === 'light' && <span className="text-amber-500 text-[10px]">✓</span>}
                   </button>
 
-                  {/* Dark Mode */}
+                  {/* Dark */}
                   <button
                     onClick={() => onSelectThemeMode('dark')}
-                    className={`p-3 rounded-2xl border-2 transition cursor-pointer flex flex-col items-center justify-center text-center gap-1.5 ${
+                    className={`py-1.5 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold ${
                       themeMode === 'dark'
-                        ? 'border-amber-500 shadow-xs'
-                        : 'hover:border-slate-400 opacity-80 hover:opacity-100'
+                        ? 'shadow-xs border'
+                        : 'opacity-70 hover:opacity-100'
                     }`}
                     style={{
-                      backgroundColor: themeMode === 'dark' ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
-                      borderColor: themeMode === 'dark' ? 'var(--accent-primary)' : 'var(--card-border)',
+                      backgroundColor: themeMode === 'dark' ? 'var(--card-bg)' : 'transparent',
+                      borderColor: themeMode === 'dark' ? 'var(--accent-primary)' : 'transparent',
                       color: 'var(--text-primary)'
                     }}
                   >
-                    <div className="w-8 h-8 rounded-full bg-slate-800 text-amber-300 flex items-center justify-center">
-                      <Moon className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-xs font-serif-lao">
-                      {t.darkMode}
-                    </span>
-                    {themeMode === 'dark' && (
-                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
-                        ✓
-                      </span>
-                    )}
+                    <Moon className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{t.darkMode}</span>
+                    {themeMode === 'dark' && <span className="text-amber-400 text-[10px]">✓</span>}
                   </button>
 
-                  {/* System Mode */}
+                  {/* System */}
                   <button
                     onClick={() => onSelectThemeMode('system')}
-                    className={`p-3 rounded-2xl border-2 transition cursor-pointer flex flex-col items-center justify-center text-center gap-1.5 ${
+                    className={`py-1.5 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold ${
                       themeMode === 'system'
-                        ? 'border-amber-500 shadow-xs'
-                        : 'hover:border-slate-400 opacity-80 hover:opacity-100'
+                        ? 'shadow-xs border'
+                        : 'opacity-70 hover:opacity-100'
                     }`}
                     style={{
-                      backgroundColor: themeMode === 'system' ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
-                      borderColor: themeMode === 'system' ? 'var(--accent-primary)' : 'var(--card-border)',
+                      backgroundColor: themeMode === 'system' ? 'var(--card-bg)' : 'transparent',
+                      borderColor: themeMode === 'system' ? 'var(--accent-primary)' : 'transparent',
                       color: 'var(--text-primary)'
                     }}
                   >
-                    <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center">
-                      <Laptop className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-xs font-serif-lao">
-                      {t.systemMode}
-                    </span>
-                    {themeMode === 'system' && (
-                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
-                        ✓
-                      </span>
-                    )}
+                    <Laptop className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{t.systemMode}</span>
+                    {themeMode === 'system' && <span className="text-amber-500 text-[10px]">✓</span>}
                   </button>
                 </div>
               </div>
 
-              {/* Section 2: Language Selection */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: 'var(--card-border)' }}>
-                  <Globe className="w-4 h-4 text-amber-600" />
-                  <h4 className="font-bold text-sm sm:text-base font-serif-lao" style={{ color: 'var(--text-primary)' }}>
+              {/* Section 2: Language Selection (Compact 2-col) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 pb-1">
+                  <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <h4 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
                     {t.selectLanguage}
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Lao Option */}
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Lao */}
                   <button
                     onClick={() => onSelectLanguage('lo')}
-                    className={`p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between text-left ${
+                    className={`p-2.5 rounded-xl border-2 transition cursor-pointer flex items-center justify-between text-left ${
                       lang === 'lo'
                         ? 'border-amber-500 shadow-xs'
-                        : 'hover:border-slate-400'
+                        : 'opacity-80 hover:opacity-100'
                     }`}
                     style={{
                       backgroundColor: lang === 'lo' ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
@@ -319,29 +313,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       color: 'var(--text-primary)'
                     }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-2xl leading-none">🇱🇦</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl leading-none">🇱🇦</span>
                       <div>
-                        <div className="font-bold text-xs sm:text-sm font-serif-lao">
-                          ພາສາລາວ
-                        </div>
-                        <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Lao language</span>
+                        <div className="font-bold text-xs font-serif-lao">ພາສາລາວ</div>
+                        <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Lao</span>
                       </div>
                     </div>
                     {lang === 'lo' && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center">
+                        <Check className="w-3 h-3 stroke-[3]" />
                       </span>
                     )}
                   </button>
 
-                  {/* English Option */}
+                  {/* English */}
                   <button
                     onClick={() => onSelectLanguage('en')}
-                    className={`p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between text-left ${
+                    className={`p-2.5 rounded-xl border-2 transition cursor-pointer flex items-center justify-between text-left ${
                       lang === 'en'
                         ? 'border-amber-500 shadow-xs'
-                        : 'hover:border-slate-400'
+                        : 'opacity-80 hover:opacity-100'
                     }`}
                     style={{
                       backgroundColor: lang === 'en' ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
@@ -349,36 +341,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       color: 'var(--text-primary)'
                     }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-2xl leading-none">🇬🇧</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl leading-none">🇬🇧</span>
                       <div>
-                        <div className="font-bold text-xs sm:text-sm">
-                          English
-                        </div>
-                        <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>ພາສາອັງກິດ</span>
+                        <div className="font-bold text-xs">English</div>
+                        <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>ພາສາອັງກິດ</span>
                       </div>
                     </div>
                     {lang === 'en' && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center">
+                        <Check className="w-3 h-3 stroke-[3]" />
                       </span>
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Section 3: Color Themes (All 6 Themes with Light & Dark variations) */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--card-border)' }}>
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-amber-600" />
-                    <h4 className="font-bold text-sm sm:text-base font-serif-lao" style={{ color: 'var(--text-primary)' }}>
+              {/* Section 3: Color Themes (Compact 2-column Grid) */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <h4 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
                       {t.calendarThemes}
                     </h4>
                   </div>
+                  <span className="text-[10px] text-amber-500 font-bold">
+                    {LAO_COLOR_THEMES.length} ໂທນສີ
+                  </span>
                 </div>
 
-                <div className="space-y-2.5">
+                {/* 2-Column Responsive Grid - Compact & Beautiful */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {LAO_COLOR_THEMES.map((theme) => {
                     const isSelected = theme.id === currentThemeId;
                     const previewColors = isDark ? theme.dark : theme.light;
@@ -387,51 +381,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div
                         key={theme.id}
                         onClick={() => onSelectTheme(theme.id)}
-                        className={`p-3 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between gap-3 ${
+                        className={`p-2.5 rounded-xl border-2 transition cursor-pointer flex items-center justify-between gap-2.5 select-none ${
                           isSelected
-                            ? 'border-amber-500 shadow-xs ring-1 ring-amber-400/50'
-                            : 'hover:border-slate-400'
+                            ? 'shadow-xs ring-1 ring-amber-400/50'
+                            : 'opacity-85 hover:opacity-100 hover:border-slate-400'
                         }`}
                         style={{
                           backgroundColor: isSelected ? 'var(--card-subtle-bg)' : 'var(--card-bg)',
                           borderColor: isSelected ? 'var(--accent-primary)' : 'var(--card-border)',
                         }}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {/* Gradient Swatch */}
                           <div
-                            className="w-10 h-10 rounded-xl shadow-xs flex items-center justify-center text-white flex-shrink-0"
+                            className="w-8 h-8 rounded-lg shadow-xs flex items-center justify-center text-white flex-shrink-0"
                             style={{ 
                               background: `linear-gradient(135deg, ${previewColors.primary}, ${previewColors.secondary})`,
-                              border: `1px solid ${previewColors.secondary}40`
+                              border: `1px solid ${previewColors.secondary}50`
                             }}
                           >
-                            {isSelected ? <Check className="w-5 h-5 drop-shadow stroke-[3]" /> : null}
+                            {isSelected ? <Check className="w-4 h-4 drop-shadow stroke-[3]" /> : null}
                           </div>
 
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h5 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
-                                {lang === 'lo' ? theme.nameLao : theme.nameEn}
-                              </h5>
-                              {isSelected && (
-                                <span className="text-[9px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded-full">
-                                  {t.activeTheme}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[10px] line-clamp-1" style={{ color: 'var(--text-muted)' }}>
-                              {theme.descriptionLao}
-                            </p>
+                          <div className="min-w-0">
+                            <h5 className="font-bold text-xs font-serif-lao leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                              {lang === 'lo' ? theme.nameLao : theme.nameEn}
+                            </h5>
+                            <span className="text-[9px] block truncate opacity-80" style={{ color: 'var(--text-muted)' }}>
+                              {theme.id === 'thatluang_amber' ? '✨ ເອກະລັກມໍລະດົກລາວ' : theme.descriptionLao.slice(0, 32) + '...'}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {/* Theme dots */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <span
-                            className="w-4 h-4 rounded-full border border-white/60 shadow-xs"
+                            className="w-3 h-3 rounded-full border border-white/60 shadow-xs"
                             style={{ backgroundColor: previewColors.primary }}
                           />
                           <span
-                            className="w-4 h-4 rounded-full border border-white/60 shadow-xs"
+                            className="w-3 h-3 rounded-full border border-white/60 shadow-xs"
                             style={{ backgroundColor: previewColors.secondary }}
                           />
                         </div>
@@ -443,30 +432,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </>
           ) : (
             /* Tab 2: Notes & Reminders Management */
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Top Action Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b" style={{ borderColor: 'var(--card-border)' }}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b" style={{ borderColor: 'var(--card-border)' }}>
                 <div>
-                  <h4 className="font-bold text-sm sm:text-base font-serif-lao" style={{ color: 'var(--text-primary)' }}>
+                  <h4 className="font-bold text-xs sm:text-sm font-serif-lao" style={{ color: 'var(--text-primary)' }}>
                     {t.notesSectionTitle}
                   </h4>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                     {t.notesSectionSubtitle}
                   </p>
                 </div>
 
                 <button
                   onClick={() => onOpenAddEvent()}
-                  className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-auto"
+                  className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition cursor-pointer shadow-xs flex items-center justify-center gap-1 self-start sm:self-auto active:scale-95"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   <span>{t.addNewNote}</span>
                 </button>
               </div>
 
               {/* Filter Tabs */}
               <div 
-                className="flex items-center gap-1.5 p-1 rounded-xl text-xs border"
+                className="flex items-center gap-1 p-1 rounded-xl text-xs border"
                 style={{ 
                   backgroundColor: 'var(--card-subtle-bg)',
                   borderColor: 'var(--card-border)' 
@@ -474,7 +463,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               >
                 <button
                   onClick={() => setNotesFilter('all')}
-                  className={`flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center ${
+                  className={`flex-1 py-1 rounded-lg font-semibold transition cursor-pointer text-center text-xs ${
                     notesFilter === 'all'
                       ? 'shadow-xs font-bold'
                       : 'opacity-70 hover:opacity-100'
@@ -488,7 +477,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
                 <button
                   onClick={() => setNotesFilter('today')}
-                  className={`flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center ${
+                  className={`flex-1 py-1 rounded-lg font-semibold transition cursor-pointer text-center text-xs ${
                     notesFilter === 'today'
                       ? 'shadow-xs font-bold'
                       : 'opacity-70 hover:opacity-100'
@@ -502,7 +491,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
                 <button
                   onClick={() => setNotesFilter('upcoming')}
-                  className={`flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center ${
+                  className={`flex-1 py-1 rounded-lg font-semibold transition cursor-pointer text-center text-xs ${
                     notesFilter === 'upcoming'
                       ? 'shadow-xs font-bold'
                       : 'opacity-70 hover:opacity-100'
@@ -519,13 +508,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Notes List */}
               {filteredEvents.length === 0 ? (
                 <div 
-                  className="p-8 text-center rounded-2xl border border-dashed space-y-2"
+                  className="p-6 text-center rounded-xl border border-dashed space-y-2"
                   style={{ 
                     backgroundColor: 'var(--card-subtle-bg)',
                     borderColor: 'var(--card-border)'
                   }}
                 >
-                  <div className="text-3xl">📝</div>
+                  <div className="text-2xl">📝</div>
                   <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
                     {t.noNotesOverall}
                   </p>
@@ -538,7 +527,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {filteredEvents.map((ev) => {
                     const catInfo = CATEGORY_INFO[ev.category];
                     const isToday = ev.date === todayStr;
@@ -546,7 +535,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     return (
                       <div
                         key={ev.id}
-                        className={`p-3.5 rounded-2xl border transition flex items-start justify-between gap-3 ${
+                        className={`p-2.5 rounded-xl border transition flex items-start justify-between gap-2.5 ${
                           ev.completed
                             ? 'opacity-70'
                             : 'shadow-xs hover:border-amber-400'
@@ -556,7 +545,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           borderColor: 'var(--card-border)',
                         }}
                       >
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex items-start gap-2.5 flex-1 min-w-0">
                           {/* Complete Checkbox */}
                           <button
                             type="button"
@@ -565,17 +554,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             title={ev.completed ? t.pending : t.completed}
                           >
                             {ev.completed ? (
-                              <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-100/20" />
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-100/20" />
                             ) : (
-                              <Circle className="w-5 h-5" />
+                              <Circle className="w-4 h-4" />
                             )}
                           </button>
 
                           {/* Event info */}
                           <div className="space-y-1 flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <span
-                                className={`font-bold text-xs sm:text-sm font-serif-lao truncate ${
+                                className={`font-bold text-xs font-serif-lao truncate ${
                                   ev.completed ? 'line-through opacity-60' : ''
                                 }`}
                                 style={{ color: 'var(--text-primary)' }}
@@ -584,24 +573,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               </span>
 
                               {/* Category Badge */}
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${catInfo.colorClass}`}>
+                              <span className={`text-[9px] px-1.5 py-0.2 rounded-full border font-medium ${catInfo.colorClass}`}>
                                 {catInfo.icon} {lang === 'lo' ? catInfo.lo : catInfo.en}
                               </span>
 
                               {ev.isDaily ? (
-                                <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded-md flex items-center gap-1">
+                                <span className="text-[9px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded-md flex items-center gap-0.5">
                                   <span>🔄</span>
                                   <span>{t.everyDay}</span>
                                 </span>
                               ) : isToday ? (
-                                <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded-md">
+                                <span className="text-[9px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded-md">
                                   {t.today}
                                 </span>
                               ) : null}
                             </div>
 
                             {/* Date, Time & Reminder Info */}
-                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]" style={{ color: 'var(--text-muted)' }}>
                               <span className="flex items-center gap-1 font-medium" style={{ color: 'var(--text-secondary)' }}>
                                 <CalendarIcon className="w-3 h-3 text-amber-500" />
                                 {ev.isDaily ? t.dailyBadge : formatLaoDateShort(ev.date, lang)}
@@ -624,7 +613,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                             {/* Note details */}
                             {ev.notes && (
-                              <p className="text-xs line-clamp-2 pt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                              <p className="text-[11px] line-clamp-1 pt-0.5" style={{ color: 'var(--text-secondary)' }}>
                                 {ev.notes}
                               </p>
                             )}
@@ -632,17 +621,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
+                        <div className="flex items-center gap-0.5 flex-shrink-0">
                           <button
                             onClick={() => onEditEvent(ev)}
-                            className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition cursor-pointer"
+                            className="p-1 text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 rounded-md transition cursor-pointer"
                             title={t.editNote}
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => onDeleteEvent(ev.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                            className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition cursor-pointer"
                             title={t.deleteNote}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -657,20 +646,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Compact Footer */}
         <div 
-          className="p-3.5 sm:p-4 border-t flex items-center justify-between flex-shrink-0"
+          className="px-3.5 sm:px-4 py-2.5 border-t flex items-center justify-between flex-shrink-0"
           style={{ 
             backgroundColor: 'var(--card-subtle-bg)',
             borderColor: 'var(--card-border)'
           }}
         >
-          <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-            {lang === 'lo' ? 'ບັນທຶກຈະຖືກເກັບໄວ້ໃນເຄື່ອງຂອງທ່ານ' : 'Settings are securely saved to your local device'}
+          <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+            {lang === 'lo' ? 'ບັນທຶກໄວ້ໃນເຄື່ອງ • Offline PWA' : 'Saved locally • Offline PWA'}
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-950 text-xs font-bold hover:opacity-90 transition cursor-pointer shadow-xs"
+            className="px-4 py-1.5 rounded-xl bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-950 text-xs font-bold hover:opacity-90 active:scale-95 transition cursor-pointer shadow-xs"
           >
             {t.done}
           </button>

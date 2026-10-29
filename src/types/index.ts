@@ -82,6 +82,7 @@ export interface Heed12Tradition {
 
 export type ThemeId = 
   | 'champa_gold' 
+  | 'thatluang_amber'
   | 'mekong_blue' 
   | 'emerald_nature' 
   | 'silk_violet' 
