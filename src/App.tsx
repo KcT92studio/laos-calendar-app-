@@ -4,6 +4,8 @@ import { CalendarMonthView } from './components/CalendarMonthView';
 import { SettingsModal } from './components/SettingsModal';
 import { NoteEditorModal } from './components/NoteEditorModal';
 import { LaoSinPattern } from './components/LaoSinPattern';
+import { InAppBrowserGuideModal } from './components/InAppBrowserGuideModal';
+import { usePWAInstall } from './utils/usePWAInstall';
 
 import { ThemeId, ThemeMode, Language, UserEvent, LaoHoliday } from './types';
 import { LAO_HOLIDAYS_2026 } from './data/laoHolidays';
@@ -161,6 +163,9 @@ export default function App() {
   const [noteEditorTargetDate, setNoteEditorTargetDate] = useState<string>(todayParts.dateStr);
   const [editingEvent, setEditingEvent] = useState<UserEvent | null>(null);
 
+  // PWA & In-App Browser (Facebook/Messenger) install management
+  const pwa = usePWAInstall();
+
   // Register Service Worker for Offline PWA Support
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -309,6 +314,36 @@ export default function App() {
       {/* Traditional Lao Sin Woven Textile Pattern Background (4-8% opacity, offline SVG) */}
       <LaoSinPattern />
 
+      {/* Facebook / In-App Browser Quick-Jump Banner */}
+      {pwa.isInAppBrowser && !pwa.isInstalled && (
+        <div 
+          className="bg-gradient-to-r from-amber-600 via-red-600 to-amber-700 text-white px-3 py-2 text-xs flex items-center justify-between gap-2 shadow-md relative z-30"
+        >
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-base shrink-0">📲</span>
+            <span className="font-serif-lao font-bold truncate text-[11px] sm:text-xs">
+              {lang === 'lo'
+                ? 'ກຳລັງເປີດໃນ Facebook: ຕິດຕັ້ງແອັບລົງໜ້າຈໍໂທລະສັບ'
+                : 'Opened in Facebook: Install App'}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              if (pwa.isAndroid) {
+                pwa.openInExternalBrowser();
+              } else {
+                pwa.setShowInAppGuide(true);
+              }
+            }}
+            className="px-2.5 py-1 rounded-full bg-white text-slate-950 font-black text-[10px] sm:text-xs hover:bg-amber-100 active:scale-95 transition shadow-xs shrink-0 cursor-pointer"
+          >
+            {pwa.isAndroid
+              ? (lang === 'lo' ? 'ເປີດໃນ Chrome ທັນທີ 🚀' : 'Open in Chrome')
+              : (lang === 'lo' ? 'ວິທີຕິດຕັ້ງ 💡' : 'How to Install')}
+          </button>
+        </div>
+      )}
+
       {/* Clean Minimal Header with PWA Install Button, ☀️/🌙 Mode Toggle, Settings and Add Note */}
       <Header
         currentTheme={currentTheme}
@@ -373,6 +408,17 @@ export default function App() {
         onSave={handleSaveEvent}
         initialDate={noteEditorTargetDate}
         initialEvent={editingEvent}
+        lang={lang}
+      />
+
+      {/* In-App Browser (Facebook/Messenger) Installation Guide Modal */}
+      <InAppBrowserGuideModal
+        isOpen={pwa.showInAppGuide}
+        onClose={() => pwa.setShowInAppGuide(false)}
+        isAndroid={pwa.isAndroid}
+        isIOS={pwa.isIOS}
+        inAppBrowserType={pwa.inAppBrowserType}
+        onOpenChrome={pwa.openInExternalBrowser}
         lang={lang}
       />
 
