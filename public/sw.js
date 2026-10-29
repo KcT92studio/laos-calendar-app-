@@ -1,5 +1,5 @@
 // Lao Calendar PWA Service Worker (Offline-First)
-const CACHE_NAME = 'lao-calendar-pwa-v4';
+const CACHE_NAME = 'lao-calendar-pwa-v7';
 
 const PRECACHE_ASSETS = [
   './',

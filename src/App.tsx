@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { CalendarMonthView } from './components/CalendarMonthView';
 import { SettingsModal } from './components/SettingsModal';
@@ -51,13 +51,39 @@ const DEFAULT_EVENTS: UserEvent[] = [
   },
 ];
 
-export default function App() {
-  // Month and Year state (Default: October 2026)
-  const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(9); // October = index 9
+// Helper to extract local date values dynamically from real system time
+export const getTodayDateParts = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return { year, month, day, dateStr };
+};
 
-  // Selected date (Default: Today 2026-10-20)
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-20');
+const getInitialSampleEvents = (dateStr: string): UserEvent[] => [
+  {
+    id: 'evt-01',
+    title: 'ກວດສອບວຽກປະຈຳວັນ',
+    date: dateStr,
+    time: '09:00',
+    category: 'work',
+    reminder: true,
+    notes: 'ກວດສອບຕາຕະລາງ ແລະ ເອກະສານສຳຄັນ',
+    completed: false,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export default function App() {
+  const todayParts = useMemo(() => getTodayDateParts(), []);
+
+  // Month and Year state (Default: dynamically set to current year and month)
+  const [currentYear, setCurrentYear] = useState(todayParts.year);
+  const [currentMonth, setCurrentMonth] = useState(todayParts.month);
+
+  // Selected date (Default: dynamically set to today's date string, e.g. 2026-10-29)
+  const [selectedDate, setSelectedDate] = useState<string>(todayParts.dateStr);
 
   // Holidays state dynamically loaded from ./holidays.json (easy to edit every year)
   const [holidays, setHolidays] = useState<LaoHoliday[]>(LAO_HOLIDAYS_2026);
@@ -132,7 +158,7 @@ export default function App() {
   // Modals state
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isNoteEditorOpen, setIsNoteEditorOpen] = useState(false);
-  const [noteEditorTargetDate, setNoteEditorTargetDate] = useState<string>('2026-10-20');
+  const [noteEditorTargetDate, setNoteEditorTargetDate] = useState<string>(todayParts.dateStr);
   const [editingEvent, setEditingEvent] = useState<UserEvent | null>(null);
 
   // Register Service Worker for Offline PWA Support
@@ -213,7 +239,7 @@ export default function App() {
   // Note actions
   const handleOpenAddEvent = (targetDate?: string) => {
     setEditingEvent(null);
-    setNoteEditorTargetDate(targetDate || selectedDate || '2026-10-20');
+    setNoteEditorTargetDate(targetDate || selectedDate || todayParts.dateStr);
     setIsNoteEditorOpen(true);
   };
 
@@ -221,6 +247,13 @@ export default function App() {
     setEditingEvent(event);
     setNoteEditorTargetDate(event.date);
     setIsNoteEditorOpen(true);
+  };
+
+  const handleGoToToday = () => {
+    const today = getTodayDateParts();
+    setCurrentYear(today.year);
+    setCurrentMonth(today.month);
+    setSelectedDate(today.dateStr);
   };
 
   const handleSaveEvent = (eventData: Omit<UserEvent, 'id' | 'createdAt'> & { id?: string }) => {
@@ -299,6 +332,8 @@ export default function App() {
           }}
           selectedDate={selectedDate}
           onSelectDate={(dateStr) => setSelectedDate(dateStr)}
+          todayDateStr={todayParts.dateStr}
+          onGoToToday={handleGoToToday}
           holidays={holidays}
           currentTheme={currentTheme}
           lang={lang}

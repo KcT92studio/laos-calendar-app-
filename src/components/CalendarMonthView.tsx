@@ -30,6 +30,8 @@ interface CalendarMonthViewProps {
   onChangeMonth: (month: number, year: number) => void;
   selectedDate: string;
   onSelectDate: (dateStr: string) => void;
+  todayDateStr?: string;
+  onGoToToday?: () => void;
   holidays: LaoHoliday[];
   currentTheme: ActiveThemeConfig;
   lang: Language;
@@ -46,6 +48,8 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   onChangeMonth,
   selectedDate,
   onSelectDate,
+  todayDateStr,
+  onGoToToday,
   holidays = [],
   currentTheme,
   lang,
@@ -61,7 +65,12 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
-  const todayStr = '2026-10-20';
+  // Dynamic real system date (e.g. '2026-10-29')
+  const getTodayDateStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const todayStr = todayDateStr || getTodayDateStr();
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay();
@@ -213,11 +222,27 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   const monthObj = LAO_MONTHS[currentMonth];
   const displayMonthName = lang === 'lo' ? monthObj.nameLao : monthObj.nameEn;
 
+  // Selected date breakdown for the authentic daily calendar sheet
+  const [selYear, selMonth, selDay] = selectedDate.split('-').map(Number);
+  const selDateObj = new Date(selYear, (selMonth || 1) - 1, selDay || 1);
+  const selDayOfWeek = LAO_DAYS_OF_WEEK[selDateObj.getDay()] || LAO_DAYS_OF_WEEK[0];
+  const isSelDateToday = selectedDate === todayStr;
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto relative z-1">
-      {/* Calendar Card Container */}
+      {/* Realistic Calendar Spiral Binder Rings (ສັນຮ່ວງປະຕິທິນແບບແຂວນ/ຕັ້ງໂຕະ) */}
+      <div className="flex items-center justify-around px-8 sm:px-14 -mb-3 relative z-20 pointer-events-none select-none">
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center">
+            <div className="w-3.5 sm:w-4 h-5.5 sm:h-6 rounded-full bg-gradient-to-b from-slate-300 via-amber-100 to-slate-500 shadow-md border border-slate-600/50" />
+            <div className="w-2.5 sm:w-3 h-1.5 rounded-full bg-black/45 -mt-1 shadow-inner" />
+          </div>
+        ))}
+      </div>
+
+      {/* Main Calendar Card Container */}
       <div 
-        className="rounded-3xl shadow-sm border overflow-hidden transition-colors duration-300"
+        className="rounded-3xl shadow-md border overflow-hidden transition-colors duration-300"
         style={{
           backgroundColor: 'var(--card-bg)',
           borderColor: 'var(--card-border)'
@@ -226,9 +251,59 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Simple Month Navigation Bar */}
+        {/* Authentic Lao Calendar Top Plaque with Patuxay Emblem (ປ້າຍຫົວປະຕິທິນແຫ່ງຊາດ) */}
         <div 
-          className="p-3.5 border-b flex items-center justify-between transition-colors duration-300"
+          className="px-3.5 sm:px-5 py-2.5 border-b flex items-center justify-between gap-2.5 relative overflow-hidden transition-colors duration-300"
+          style={{
+            background: 'linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end))',
+            borderColor: 'var(--card-border)',
+            color: '#ffffff'
+          }}
+        >
+          {/* Left: Patuxay Lao Flag Crest & Calendar Title */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img 
+              src="./icon-192.png" 
+              alt="ປະຕິທິນລາວ" 
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-amber-300 shadow-md shrink-0" 
+            />
+            <div className="min-w-0">
+              <span className="text-[10px] sm:text-[11px] font-bold text-amber-200 tracking-wider uppercase block leading-tight truncate">
+                {lang === 'lo' ? 'ປະຕິທິນແຫ່ງຊາດລາວ • B.E. 2569' : 'Lao National Calendar • B.E. 2569'}
+              </span>
+              <span className="text-xs sm:text-base font-bold font-serif-lao text-white leading-tight">
+                {t.buddhistYearPrefix} {toBuddhistYear(currentYear)} • ຄ.ສ. {currentYear}
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Lunar Month Badge & Today Button */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[10px] sm:text-xs font-serif-lao px-2.5 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/40 text-amber-200 font-bold hidden xs:inline-block">
+              {monthObj.lunarName}
+            </span>
+            {onGoToToday && (
+              <button
+                type="button"
+                onClick={onGoToToday}
+                className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold border transition active:scale-95 cursor-pointer shadow-xs hover:opacity-95 shrink-0 flex items-center gap-1"
+                style={{
+                  backgroundColor: 'var(--today-bg)',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--today-text)',
+                }}
+                title={t.today}
+              >
+                <span>📍</span>
+                <span>{t.today}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Month Navigation Bar */}
+        <div 
+          className="p-3 sm:p-3.5 border-b flex items-center justify-between transition-colors duration-300"
           style={{
             backgroundColor: 'var(--card-subtle-bg)',
             borderColor: 'var(--card-border)'
@@ -236,7 +311,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
         >
           <button
             onClick={handlePrevMonth}
-            className="w-10 h-10 rounded-xl shadow-xs border hover:opacity-80 active:scale-95 flex items-center justify-center transition cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-xs border hover:opacity-80 active:scale-95 flex items-center justify-center transition cursor-pointer"
             style={{
               backgroundColor: 'var(--card-bg)',
               borderColor: 'var(--card-border)',
@@ -247,9 +322,9 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <div className="text-center select-none">
+          <div className="text-center select-none flex flex-col items-center">
             <h2 
-              className="text-lg sm:text-xl font-bold font-serif-lao leading-tight transition-colors duration-300"
+              className="text-lg sm:text-2xl font-black font-serif-lao leading-tight transition-colors duration-300 tracking-wide"
               style={{ color: 'var(--text-primary)' }}
             >
               {displayMonthName} {currentYear}
@@ -264,7 +339,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
 
           <button
             onClick={handleNextMonth}
-            className="w-10 h-10 rounded-xl shadow-xs border hover:opacity-80 active:scale-95 flex items-center justify-center transition cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-xs border hover:opacity-80 active:scale-95 flex items-center justify-center transition cursor-pointer"
             style={{
               backgroundColor: 'var(--card-bg)',
               borderColor: 'var(--card-border)',
@@ -276,7 +351,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
           </button>
         </div>
 
-        {/* Days of Week Header */}
+        {/* Days of Week Header with Authentic Sunday Red & Saturday Blue */}
         <div 
           className="grid grid-cols-7 text-center border-b py-2 select-none transition-colors duration-300"
           style={{
@@ -284,15 +359,32 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             borderColor: 'var(--card-border)'
           }}
         >
-          {LAO_DAYS_OF_WEEK.map((day) => (
-            <div 
-              key={day.dayIndex} 
-              className={`${day.color} font-serif-lao font-bold`}
-              style={{ fontSize: 'clamp(0.68rem, 2.4vw, 0.85rem)' }}
-            >
-              {lang === 'lo' ? day.shortLao : day.shortEn}
-            </div>
-          ))}
+          {LAO_DAYS_OF_WEEK.map((day, dIdx) => {
+            const isSunday = dIdx === 0;
+            const isSaturday = dIdx === 6;
+            return (
+              <div 
+                key={day.dayIndex} 
+                className={`font-serif-lao font-black px-0.5 ${
+                  isSunday 
+                    ? 'text-red-600 dark:text-red-400' 
+                    : isSaturday 
+                    ? 'text-blue-600 dark:text-blue-400' 
+                    : ''
+                }`}
+                style={{ 
+                  fontSize: 'clamp(0.72rem, 2.5vw, 0.9rem)',
+                  color: !isSunday && !isSaturday ? 'var(--text-primary)' : undefined,
+                }}
+              >
+                <span className={`inline-block px-1 sm:px-2 py-0.5 rounded-md ${
+                  isSunday ? 'bg-red-500/10' : isSaturday ? 'bg-blue-500/10' : ''
+                }`}>
+                  {lang === 'lo' ? day.shortLao : day.shortEn}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Calendar 7-column Grid */}
@@ -367,7 +459,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Center: Big Bold Day Number (1, 2, 3...) */}
+                {/* 2. Center: Big Bold Day Number (1, 2, 3...) with Printed Calendar Sunday Red & Saturday Blue */}
                 <div className="flex-1 flex items-center justify-center w-full my-auto">
                   <span
                     className={`font-black font-sans leading-none flex items-center justify-center transition-transform ${
@@ -382,7 +474,11 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                         ? 'var(--holiday-color)'
                         : !cell.isCurrentMonth
                         ? 'var(--text-muted)'
-                        : 'var(--text-primary)', // Crisp white in dark mode, dark slate in light mode
+                        : (idx % 7 === 0)
+                        ? '#dc2626' /* Traditional Printed Calendar Sunday Red */
+                        : (idx % 7 === 6)
+                        ? '#2563eb' /* Traditional Printed Calendar Saturday Blue */
+                        : 'var(--text-primary)',
                     }}
                   >
                     {cell.day}
@@ -420,73 +516,164 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
         {t.swipeHint}
       </div>
 
-      {/* Selected Day Details Card */}
+      {/* Authentic Lao Tear-Off Calendar Leaf (ບັດປະຕິທິນປະຈຳວັນແບບຈີກ) */}
       <div 
-        className="rounded-3xl p-5 shadow-sm border space-y-4 transition-colors duration-300"
+        className="rounded-3xl shadow-md border overflow-hidden space-y-0 transition-colors duration-300"
         style={{
           backgroundColor: 'var(--card-bg)',
           borderColor: 'var(--card-border)'
         }}
       >
-        {/* Selected Date Title */}
+        {/* Perforated Crimson Calendar Spine Banner */}
         <div 
-          className="pb-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-          style={{ borderColor: 'var(--card-border)' }}
+          className="px-4 py-2 flex items-center justify-between text-white relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #b91c1c, #991b1b)',
+          }}
         >
-          <div>
-            <span 
-              className="text-[11px] font-medium block"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {t.dateDetails}
+          <div className="flex items-center gap-2">
+            <span className="text-sm">📅</span>
+            <span className="text-xs font-bold font-serif-lao tracking-wide uppercase text-amber-200">
+              {lang === 'lo' ? 'ບັດປະຕິທິນປະຈຳວັນ' : 'Daily Calendar Sheet'}
             </span>
-            <h3 
-              className="text-lg sm:text-xl font-bold font-serif-lao leading-tight"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {formatLaoDateLong(selectedDate, lang)}
-            </h3>
+          </div>
+          
+          {/* Stitching dots perforation */}
+          <div className="text-[10px] text-amber-200/80 tracking-widest font-mono select-none hidden xs:block">
+            ••••••••••••••••••••
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            {selectedHoliday?.isOfficialDayOff && (
-              <span 
-                className="px-2.5 py-0.5 rounded-full font-bold border"
-                style={{
-                  backgroundColor: 'var(--holiday-bg)',
-                  borderColor: 'var(--holiday-border)',
-                  color: 'var(--holiday-color)',
-                }}
-              >
-                🔴 {t.officialHoliday}
+          <div className="flex items-center gap-1.5 text-xs font-bold">
+            {isSelDateToday ? (
+              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black shadow-xs">
+                {lang === 'lo' ? 'ມື້ນີ້' : 'Today'}
               </span>
-            )}
-
-            {selectedWanSin && (
-              <span 
-                className="px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1"
-                style={{
-                  backgroundColor: 'var(--wan-sin-color)',
-                  color: 'var(--btn-primary-text)',
-                }}
+            ) : onGoToToday ? (
+              <button
+                type="button"
+                onClick={onGoToToday}
+                className="px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold border border-white/30 transition cursor-pointer active:scale-95 flex items-center gap-1"
               >
-                <Moon className="w-3 h-3" />
-                <span>{selectedWanSin.phaseNameLao}</span>
-              </span>
-            )}
-
-            <span 
-              className="px-2.5 py-0.5 rounded-full font-bold border"
-              style={{
-                backgroundColor: 'var(--card-subtle-bg)',
-                borderColor: 'var(--card-border)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              {selectedAuspicious.ratingNameLao}
-            </span>
+                <span>🔄</span>
+                <span>{lang === 'lo' ? 'ໄປມື້ນີ້' : 'Go to Today'}</span>
+              </button>
+            ) : null}
           </div>
         </div>
+
+        {/* Calendar Sheet Main Date Display */}
+        <div className="p-4 sm:p-5 space-y-4">
+          <div 
+            className="pb-4 border-b flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 text-center sm:text-left"
+            style={{ borderColor: 'var(--card-border)' }}
+          >
+            {/* Big Traditional Calendar Date Box */}
+            <div className="flex items-center gap-3.5 sm:gap-4">
+              <div 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center border shadow-inner shrink-0"
+                style={{
+                  backgroundColor: 'var(--card-subtle-bg)',
+                  borderColor: 'var(--card-border)',
+                }}
+              >
+                <span 
+                  className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider"
+                  style={{ color: selDayOfWeek.dayIndex === 0 ? '#dc2626' : selDayOfWeek.dayIndex === 6 ? '#2563eb' : 'var(--accent-primary)' }}
+                >
+                  {lang === 'lo' ? selDayOfWeek.shortLao : selDayOfWeek.shortEn}
+                </span>
+                <span 
+                  className="text-2xl sm:text-3xl font-black font-sans leading-none"
+                  style={{ 
+                    color: selDayOfWeek.dayIndex === 0 ? '#dc2626' : selDayOfWeek.dayIndex === 6 ? '#2563eb' : 'var(--text-primary)' 
+                  }}
+                >
+                  {selDay || 1}
+                </span>
+                <span 
+                  className="text-[9px] font-bold opacity-80"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {LAO_MONTHS[currentMonth]?.nameLao}
+                </span>
+              </div>
+
+              <div>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mb-1">
+                  <span 
+                    className="text-sm sm:text-base font-extrabold font-serif-lao"
+                    style={{ color: selDayOfWeek.dayIndex === 0 ? '#dc2626' : selDayOfWeek.dayIndex === 6 ? '#2563eb' : 'var(--text-primary)' }}
+                  >
+                    {lang === 'lo' ? selDayOfWeek.fullLao : selDayOfWeek.shortEn}
+                  </span>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    • {formatLaoDateLong(selectedDate, lang)}
+                  </span>
+                </div>
+
+                {/* Lunar phase text on the tear sheet */}
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 text-xs">
+                  <span 
+                    className="px-2.5 py-0.5 rounded-full font-bold border flex items-center gap-1"
+                    style={{
+                      backgroundColor: 'var(--card-subtle-bg)',
+                      borderColor: 'var(--card-border)',
+                      color: 'var(--wan-sin-color)'
+                    }}
+                  >
+                    <Moon className="w-3 h-3" />
+                    <span>
+                      {selectedWanSin ? selectedWanSin.phaseNameLao : getCompactLunarText(selDay || 1, currentMonth, selectedWanSin)}
+                    </span>
+                  </span>
+
+                  {selectedHoliday?.isOfficialDayOff && (
+                    <span 
+                      className="px-2.5 py-0.5 rounded-full font-bold border"
+                      style={{
+                        backgroundColor: 'var(--holiday-bg)',
+                        borderColor: 'var(--holiday-border)',
+                        color: 'var(--holiday-color)',
+                      }}
+                    >
+                      🔴 {t.officialHoliday}
+                    </span>
+                  )}
+
+                  <span 
+                    className="px-2.5 py-0.5 rounded-full font-bold border"
+                    style={{
+                      backgroundColor: 'var(--card-subtle-bg)',
+                      borderColor: 'var(--card-border)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    {selectedAuspicious.ratingNameLao}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lucky Hours on the tear sheet */}
+            <div 
+              className="p-2 sm:p-2.5 rounded-xl border text-xs text-left max-w-xs shrink-0"
+              style={{
+                backgroundColor: 'var(--card-subtle-bg)',
+                borderColor: 'var(--card-border)'
+              }}
+            >
+              <div className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 mb-0.5">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{t.goodHours}</span>
+              </div>
+              <p className="text-[11px] leading-tight" style={{ color: 'var(--text-primary)' }}>
+                {selectedAuspicious.goodHoursLao}
+              </p>
+            </div>
+          </div>
 
         {/* 1. Daily Notes & Reminders Section (ບັນທຶກວຽກງານ & ແຈ້ງເຕືອນສຳລັບມື້ນີ້) */}
         <div 
@@ -755,41 +942,34 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             </div>
           </div>
         </div>
+        </div>
       </div>
 
-      {/* Lao Holidays for Current Month Card - Only rendered if this month has holidays */}
+      {/* Lao Holidays for Current Month Card - Compact, Sleek & Space-efficient */}
       {currentMonthHolidays.length > 0 && (
         <div 
-          className="rounded-3xl p-5 shadow-sm border space-y-3.5 transition-colors duration-300"
+          className="rounded-2xl p-3 sm:p-4 shadow-xs border space-y-2 transition-colors duration-300"
           style={{
             backgroundColor: 'var(--card-bg)',
             borderColor: 'var(--card-border)'
           }}
         >
+          {/* Header */}
           <div 
-            className="flex items-center justify-between pb-3 border-b"
+            className="flex items-center justify-between pb-2 border-b"
             style={{ borderColor: 'var(--card-border)' }}
           >
-            <div className="flex items-center gap-2.5">
-              <span 
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold border"
-                style={{
-                  backgroundColor: 'var(--holiday-bg)',
-                  borderColor: 'var(--holiday-border)',
-                  color: 'var(--holiday-color)',
-                }}
-              >
-                🇱🇦
-              </span>
+            <div className="flex items-center gap-2">
+              <span className="text-base">🇱🇦</span>
               <div>
                 <h4 
-                  className="font-bold text-base sm:text-lg font-serif-lao leading-snug"
+                  className="font-bold text-xs sm:text-sm font-serif-lao leading-tight"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {t.monthHolidaysTitle} {displayMonthName}
                 </h4>
                 <p 
-                  className="text-[11px]"
+                  className="text-[10px] sm:text-[11px]"
                   style={{ color: 'var(--text-muted)' }}
                 >
                   {t.monthHolidaysSubtitle} {currentMonthHolidays.length} {t.importantDaysCount}
@@ -797,7 +977,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
               </div>
             </div>
             <span 
-              className="text-xs font-bold px-2.5 py-1 rounded-full border"
+              className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border"
               style={{
                 backgroundColor: 'var(--holiday-bg)',
                 borderColor: 'var(--holiday-border)',
@@ -808,14 +988,21 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2">
+          {/* Compact Holiday Items List */}
+          <div className="space-y-1.5">
             {currentMonthHolidays.map((holiday) => {
               const isSelected = holiday.date === selectedDate;
+              const holidayDateParts = holiday.date.split('-');
+              const holidayDay = holidayDateParts[2] || '';
+              const holidayMonthIndex = parseInt(holidayDateParts[1] || '1', 10) - 1;
+              const hMonthObj = LAO_MONTHS[holidayMonthIndex];
+              const hMonthName = lang === 'lo' ? hMonthObj?.nameLao : hMonthObj?.nameEn;
+
               return (
                 <div
                   key={holiday.id}
                   onClick={() => onSelectDate(holiday.date)}
-                  className={`p-3.5 rounded-2xl transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-2 border ${
+                  className={`p-2 sm:p-2.5 rounded-xl transition cursor-pointer flex items-center justify-between gap-2.5 border active:scale-[0.99] ${
                     isSelected ? 'ring-2' : ''
                   }`}
                   style={{
@@ -824,17 +1011,33 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                     boxShadow: isSelected ? `0 0 0 1px var(--holiday-color)` : undefined,
                   }}
                 >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
+                  {/* Left: Mini Date Badge */}
+                  <div
+                    className="w-10 sm:w-11 h-10 sm:h-11 rounded-lg flex flex-col items-center justify-center shrink-0 border text-center transition-colors"
+                    style={{
+                      backgroundColor: isSelected ? 'var(--holiday-color)' : 'var(--card-subtle-bg)',
+                      borderColor: isSelected ? 'var(--holiday-color)' : 'var(--holiday-border)',
+                      color: isSelected ? 'var(--btn-primary-text)' : 'var(--holiday-color)',
+                    }}
+                  >
+                    <span className="text-xs sm:text-sm font-black leading-none">{holidayDay}</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold leading-tight mt-0.5 opacity-90 truncate max-w-[36px]">
+                      {hMonthName}
+                    </span>
+                  </div>
+
+                  {/* Middle: Title, Badges, and Brief Info */}
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span 
-                        className="font-bold text-sm sm:text-base font-serif-lao"
+                        className="font-bold text-xs sm:text-sm font-serif-lao truncate"
                         style={{ color: 'var(--text-primary)' }}
                       >
                         {lang === 'lo' ? holiday.nameLao : holiday.nameEn}
                       </span>
                       {holiday.isOfficialDayOff && (
                         <span 
-                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          className="text-[9px] font-bold px-1.5 py-0.2 rounded-full shrink-0"
                           style={{
                             backgroundColor: 'var(--holiday-color)',
                             color: 'var(--btn-primary-text)'
@@ -844,31 +1047,29 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                         </span>
                       )}
                     </div>
-                    <div className="text-xs flex flex-wrap items-center gap-x-2 gap-y-0.5" style={{ color: 'var(--text-muted)' }}>
-                      <span className="font-semibold" style={{ color: 'var(--holiday-color)' }}>
-                        🗓️ {formatLaoDateShort(holiday.date, lang)}
-                      </span>
+                    <div className="text-[10px] sm:text-[11px] flex items-center gap-1.5 truncate" style={{ color: 'var(--text-muted)' }}>
                       {holiday.lunarInfoLao && (
-                        <span>• {holiday.lunarInfoLao}</span>
+                        <span className="truncate">{holiday.lunarInfoLao}</span>
                       )}
                     </div>
                     {(lang === 'lo' ? holiday.descriptionLao : holiday.descriptionEn) && (
-                      <p className="text-xs line-clamp-1" style={{ color: 'var(--text-secondary)' }}>
+                      <p className="text-[10px] sm:text-[11px] line-clamp-1 opacity-75" style={{ color: 'var(--text-secondary)' }}>
                         {lang === 'lo' ? holiday.descriptionLao : holiday.descriptionEn}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex-shrink-0 self-end sm:self-center">
+                  {/* Right: Sleek Action Indicator */}
+                  <div className="shrink-0 flex items-center">
                     <span
-                      className="text-xs font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1 transition shadow-xs"
+                      className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-lg border transition flex items-center gap-0.5"
                       style={{
-                        backgroundColor: isSelected ? 'var(--holiday-color)' : 'var(--card-bg)',
-                        color: isSelected ? 'var(--btn-primary-text)' : 'var(--text-primary)',
-                        border: `1px solid var(--card-border)`
+                        backgroundColor: isSelected ? 'var(--holiday-color)' : 'var(--card-subtle-bg)',
+                        borderColor: isSelected ? 'var(--holiday-color)' : 'var(--card-border)',
+                        color: isSelected ? 'var(--btn-primary-text)' : 'var(--text-muted)'
                       }}
                     >
-                      {isSelected ? t.currentlyViewing : t.viewDetails}
+                      {isSelected ? '✓ ' + t.currentlyViewing : '→'}
                     </span>
                   </div>
                 </div>

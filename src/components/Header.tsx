@@ -34,13 +34,22 @@ export const Header: React.FC<HeaderProps> = ({
       <div className={`h-1 w-full bg-gradient-to-r ${currentTheme.accentBarGradient}`}></div>
 
       <div className="max-w-4xl mx-auto px-2.5 sm:px-4 py-2 sm:py-3 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 min-w-0 w-full">
-        {/* Simple Brand Title */}
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 max-w-[50%] sm:max-w-none">
-          <span className="text-xl sm:text-2xl leading-none shrink-0 drop-shadow-xs">🌸</span>
+        {/* Authentic Lao Calendar Emblem & Brand Title */}
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[55%] sm:max-w-none">
+          <img 
+            src="./icon-192.png" 
+            alt="ປະຕິທິນລາວ" 
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-amber-300/80 shadow-md shrink-0 transition-transform active:scale-95" 
+          />
           <div className="min-w-0">
-            <h1 className="text-sm sm:text-lg md:text-xl font-bold font-serif-lao text-amber-100 leading-tight truncate">
-              {t.appTitle}
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm sm:text-lg md:text-xl font-bold font-serif-lao text-amber-100 leading-tight truncate">
+                {t.appTitle}
+              </h1>
+              <span className="hidden xs:inline-block px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-400/20 border border-amber-300/30 text-amber-200 shrink-0">
+                2026
+              </span>
+            </div>
             <span className="text-[10px] text-slate-300 hidden sm:block truncate opacity-90">
               {t.appSubtitle}
             </span>
