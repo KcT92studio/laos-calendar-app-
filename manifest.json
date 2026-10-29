@@ -1,38 +1,33 @@
+
 {
-  "id": "./",
+  "id": "/laos-calendar-app-/",
   "name": "ປະຕິທິນລາວ 2026 - Lao Calendar",
   "short_name": "ປະຕິທິນລາວ",
   "description": "ປະຕິທິນລາວ ພ.ສ. 2569 ຄົບທຸກວັນພັກລັດຖະການ, ວັນສິນ, ມື້ດີຍາມດີ ແລະ ໂນ້ດບັນທຶກວຽກງານ",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "/laos-calendar-app-/",
+  "scope": "/laos-calendar-app-/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#b45309",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "/laos-calendar-app-/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "/laos-calendar-app-/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "/laos-calendar-app-/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "./icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ]
 }
