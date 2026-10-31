@@ -1,5 +1,5 @@
-import React from 'react';
-import { Settings, Plus, Download, Sun, Moon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, Plus, Download, Sun, Moon, Share2, Check } from 'lucide-react';
 import { ActiveThemeConfig, ThemeId, Language } from '../types';
 import { LAO_COLOR_THEMES } from '../data/themes';
 import { TRANSLATIONS } from '../utils/translations';
@@ -28,6 +28,51 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const t = TRANSLATIONS[lang];
   const { isInstalled, install } = usePWAInstall();
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareTitle = lang === 'lo' ? 'ປະຕິທິນລາວ 2026 - Lao Calendar' : 'Lao Calendar 2026';
+    const shareText = lang === 'lo'
+      ? 'ປະຕິທິນລາວ ພ.ສ. 2569 ຄົບທຸກວັນພັກລັດຖະການ, ວັນສິນ, ມື້ດີຍາມດີ ແລະ ໂນ້ດບັນທຶກວຽກງານ'
+      : 'Lao Calendar 2026 with official holidays, Buddhist Wan Sin, auspicious times, and notes';
+    const shareUrl = window.location.href;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          await copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      await copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = async (url: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    }
+  };
 
   return (
     <header className={`bg-gradient-to-r ${currentTheme.headerGradient} text-white shadow-md border-b-2 ${currentTheme.headerBorder} transition-all duration-300 w-full max-w-full overflow-hidden relative z-10`}>
@@ -35,11 +80,11 @@ export const Header: React.FC<HeaderProps> = ({
 
       <div className="max-w-4xl mx-auto px-2.5 sm:px-4 py-2 sm:py-3 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 min-w-0 w-full">
         {/* Authentic Lao Calendar Emblem & Brand Title */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[55%] sm:max-w-none">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[50%] sm:max-w-none">
           <img 
             src="./icon-192.png" 
             alt="ປະຕິທິນລາວ" 
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-amber-300/80 shadow-md shrink-0 transition-transform active:scale-95" 
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover ring-2 ring-amber-300/80 shadow-md shrink-0 transition-transform active:scale-95" 
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
@@ -56,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Header Actions: Native PWA Install Button + Mode Toggle (☀️/🌙) + Quick Note + Settings */}
+        {/* Header Actions: Native PWA Install Button + Share Button + Mode Toggle (☀️/🌙) + Quick Note + Settings */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {/* PWA Install Button using beforeinstallprompt (Compact on mobile) */}
           {!isInstalled && (
@@ -74,6 +119,34 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
           )}
+
+          {/* Share App Button (Native Web Share with copy link fallback) */}
+          <button
+            onClick={handleShare}
+            className={`px-2 sm:px-2.5 py-1.5 rounded-full transition cursor-pointer border active:scale-95 text-xs flex items-center gap-1 shrink-0 ${
+              copied
+                ? 'bg-emerald-500 text-slate-950 border-emerald-300/50 font-bold shadow-xs'
+                : 'bg-white/15 hover:bg-white/25 text-white border-white/20'
+            }`}
+            title={copied ? (lang === 'lo' ? 'ກັອບປີ້ລິ້ງແລ້ວ!' : 'Link copied!') : (lang === 'lo' ? 'ແຊຣ໌ແອັບ' : 'Share App')}
+            aria-label={lang === 'lo' ? 'ແຊຣ໌ແອັບ' : 'Share App'}
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />
+                <span className="text-[10px] sm:text-[11px] font-serif-lao font-bold">
+                  {lang === 'lo' ? 'ກັອບປີ້ແລ້ວ' : 'Copied'}
+                </span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5 text-amber-200" />
+                <span className="text-[10px] sm:text-[11px] font-serif-lao hidden xs:inline">
+                  {lang === 'lo' ? 'ແຊຣ໌' : 'Share'}
+                </span>
+              </>
+            )}
+          </button>
 
           {/* Dark / Light Mode Toggle Button (☀️/🌙) */}
           <button

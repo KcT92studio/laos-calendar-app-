@@ -11,7 +11,9 @@ import {
   CheckCircle2, 
   Circle, 
   Trash2, 
-  Edit3 
+  Edit3,
+  Share2,
+  Check
 } from 'lucide-react';
 import { LaoHoliday, WanSinDay, ActiveThemeConfig, Language, UserEvent } from '../types';
 import { 
@@ -228,6 +230,59 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   const selDayOfWeek = LAO_DAYS_OF_WEEK[selDateObj.getDay()] || LAO_DAYS_OF_WEEK[0];
   const isSelDateToday = selectedDate === todayStr;
 
+  const [dayCopied, setDayCopied] = useState(false);
+
+  const handleShareDay = async () => {
+    const formattedDate = formatLaoDateLong(selDateObj, lang);
+    let details = `📅 ${formattedDate}`;
+    if (selectedWanSin) {
+      details += `\n🌕 ${selectedWanSin.phaseNameLao}`;
+    }
+    if (selectedHoliday) {
+      details += `\n🎉 ${lang === 'lo' ? selectedHoliday.nameLao : selectedHoliday.nameEn}`;
+    }
+    if (selectedAuspicious?.goodHoursLao) {
+      details += `\n✨ ຍາມດີ: ${selectedAuspicious.goodHoursLao}`;
+    }
+    const shareText = `${details}\n\n🇱🇦 ປະຕິທິນລາວ 2026 (Lao Calendar)\n${window.location.href}`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `ປະຕິທິນລາວ: ${formattedDate}`,
+          text: shareText,
+          url: window.location.href,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          await copyDayText(shareText);
+        }
+      }
+    } else {
+      await copyDayText(shareText);
+    }
+  };
+
+  const copyDayText = async (text: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const input = document.createElement('textarea');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      setDayCopied(true);
+      setTimeout(() => setDayCopied(false), 2200);
+    } catch {
+      setDayCopied(true);
+      setTimeout(() => setDayCopied(false), 2200);
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto relative z-1">
       {/* Realistic Calendar Spiral Binder Rings (ສັນຮ່ວງປະຕິທິນແບບແຂວນ/ຕັ້ງໂຕະ) */}
@@ -269,7 +324,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
             <img 
               src="./icon-192.png" 
               alt="ປະຕິທິນລາວ" 
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-amber-300 shadow-md shrink-0" 
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover ring-2 ring-amber-300 shadow-md shrink-0" 
             />
             <div className="min-w-0">
               <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 tracking-wider uppercase block leading-tight truncate drop-shadow-xs">
@@ -563,6 +618,30 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                 <span>{lang === 'lo' ? 'ໄປມື້ນີ້' : 'Go to Today'}</span>
               </button>
             ) : null}
+
+            {/* Share Day Details Button */}
+            <button
+              type="button"
+              onClick={handleShareDay}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition cursor-pointer active:scale-95 flex items-center gap-1 ${
+                dayCopied 
+                  ? 'bg-emerald-400 text-slate-950 border-emerald-300 font-black' 
+                  : 'bg-white/20 hover:bg-white/30 text-white border-white/30'
+              }`}
+              title={dayCopied ? (lang === 'lo' ? 'ກັອບປີ້ລາຍລະອຽດແລ້ວ' : 'Copied') : (lang === 'lo' ? 'ແຊຣ໌ວັນນີ້' : 'Share Day')}
+            >
+              {dayCopied ? (
+                <>
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  <span>{lang === 'lo' ? 'ກັອບປີ້ແລ້ວ' : 'Copied'}</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3 h-3 text-amber-200" />
+                  <span>{lang === 'lo' ? 'ແຊຣ໌ມື້ນີ້' : 'Share'}</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
