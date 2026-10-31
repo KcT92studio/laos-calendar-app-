@@ -16,6 +16,9 @@ const STORAGE_KEY_THEME = 'lao_calendar_theme_v2';
 const STORAGE_KEY_MODE = 'lao_calendar_theme_mode_v2';
 const STORAGE_KEY_LANG = 'lao_calendar_lang_v1';
 const STORAGE_KEY_EVENTS = 'lao_calendar_events_v2';
+const STORAGE_KEY_SELECTED_DATE = 'lao_calendar_selected_date_v1';
+const STORAGE_KEY_VIEWED_MONTH = 'lao_calendar_viewed_month_v1';
+const STORAGE_KEY_VIEWED_YEAR = 'lao_calendar_viewed_year_v1';
 
 const DEFAULT_EVENTS: UserEvent[] = [
   {
@@ -80,12 +83,39 @@ const getInitialSampleEvents = (dateStr: string): UserEvent[] => [
 export default function App() {
   const todayParts = useMemo(() => getTodayDateParts(), []);
 
-  // Month and Year state (Default: dynamically set to current year and month)
-  const [currentYear, setCurrentYear] = useState(todayParts.year);
-  const [currentMonth, setCurrentMonth] = useState(todayParts.month);
+  // Selected date (Default: localStorage value or dynamically set to today's date string, e.g. 2026-10-29)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SELECTED_DATE);
+      if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) {
+        return saved;
+      }
+    } catch {}
+    return todayParts.dateStr;
+  });
 
-  // Selected date (Default: dynamically set to today's date string, e.g. 2026-10-29)
-  const [selectedDate, setSelectedDate] = useState<string>(todayParts.dateStr);
+  // Month and Year state (Default: localStorage or dynamically set to current year and month)
+  const [currentYear, setCurrentYear] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_VIEWED_YEAR);
+      if (saved) {
+        const y = parseInt(saved, 10);
+        if (!isNaN(y)) return y;
+      }
+    } catch {}
+    return todayParts.year;
+  });
+
+  const [currentMonth, setCurrentMonth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_VIEWED_MONTH);
+      if (saved !== null) {
+        const m = parseInt(saved, 10);
+        if (!isNaN(m) && m >= 0 && m <= 11) return m;
+      }
+    } catch {}
+    return todayParts.month;
+  });
 
   // Holidays state dynamically loaded from ./holidays.json (easy to edit every year)
   const [holidays, setHolidays] = useState<LaoHoliday[]>(LAO_HOLIDAYS_2026);
@@ -240,6 +270,25 @@ export default function App() {
       console.error(e);
     }
   }, [events]);
+
+  // Sync selectedDate to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_SELECTED_DATE, selectedDate);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [selectedDate]);
+
+  // Sync viewed year and month to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_VIEWED_YEAR, String(currentYear));
+      localStorage.setItem(STORAGE_KEY_VIEWED_MONTH, String(currentMonth));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [currentYear, currentMonth]);
 
   // Note actions
   const handleOpenAddEvent = (targetDate?: string) => {

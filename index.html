@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="lo" style="overflow-x: hidden; width: 100%; max-width: 100vw; overscroll-behavior-y: none; overscroll-behavior: none;">
+<html lang="lo" style="overflow-x: hidden; width: 100%; max-width: 100vw;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
@@ -20,32 +20,9 @@
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
     <link rel="apple-touch-icon" href="./icon-192.png" />
-    <script>
-      // Prevent browser pull-to-refresh on mobile while preserving smooth in-page scrolling
-      (function() {
-        var startY = 0;
-        window.addEventListener('touchstart', function(e) {
-          if (e.touches && e.touches.length === 1) {
-            startY = e.touches[0].clientY;
-          }
-        }, { passive: true });
-
-        window.addEventListener('touchmove', function(e) {
-          if (e.touches && e.touches.length === 1) {
-            var currentY = e.touches[0].clientY;
-            // When user is at the top of the window and pulls downward
-            if (window.scrollY <= 0 && currentY > startY) {
-              if (e.cancelable) {
-                e.preventDefault();
-              }
-            }
-          }
-        }, { passive: false });
-      })();
-    </script>
   </head>
-  <body class="bg-amber-50/40 text-slate-800 font-['Phetsarath',sans-serif] antialiased selection:bg-amber-500 selection:text-white overflow-x-hidden w-full max-w-full" style="overflow-x: hidden; width: 100%; max-width: 100vw; overscroll-behavior-y: none; overscroll-behavior: none;">
-    <div id="root" class="overflow-x-hidden w-full max-w-full" style="overscroll-behavior-y: none; overscroll-behavior: none;"></div>
+  <body class="bg-amber-50/40 text-slate-800 font-['Phetsarath',sans-serif] antialiased selection:bg-amber-500 selection:text-white overflow-x-hidden w-full max-w-full" style="overflow-x: hidden; width: 100%; max-width: 100vw;">
+    <div id="root" class="overflow-x-hidden w-full max-w-full"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
